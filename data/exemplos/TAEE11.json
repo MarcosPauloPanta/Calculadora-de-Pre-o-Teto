@@ -1,0 +1,24 @@
+{
+  "nome": "TAESA UNIT (dados ilustrativos)",
+  "preco_atual": 11.0,
+  "lpa": 2.4,
+  "vpa": 10.0,
+  "proventos": [
+    {
+      "data": "2026-02-15",
+      "valor": 0.9
+    },
+    {
+      "data": "2026-05-15",
+      "valor": 0.9
+    },
+    {
+      "data": "2026-08-15",
+      "valor": 0.9
+    },
+    {
+      "data": "2026-11-15",
+      "valor": 0.9
+    }
+  ]
+}

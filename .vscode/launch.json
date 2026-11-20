@@ -1,0 +1,38 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Calcular (dados de exemplo, offline)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/main.py",
+      "args": ["calcular", "PETR4", "TAEE11", "HGLG11", "AAPL34", "BOVA11", "MGLU3",
+               "--fonte", "arquivo", "--data-referencia", "2026-11-20"],
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "Calcular (dados reais, online)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/main.py",
+      "args": ["calcular", "PETR4", "ITUB4", "HGLG11"],
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "Histórico",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/main.py",
+      "args": ["historico"],
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "Testes (unittest)",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "unittest",
+      "args": ["discover", "-s", "tests", "-t", ".", "-v"],
+      "console": "integratedTerminal"
+    }
+  ]
+}
