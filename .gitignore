@@ -6,3 +6,7 @@ venv/
 data/historico.json
 *.tmp
 .idea/
+
+# Dados brutos da CVM (baixados automaticamente; não versionar)
+.cache/cvm/
+data/cvm/
