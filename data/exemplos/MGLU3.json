@@ -2,6 +2,92 @@
   "nome": "VAREJISTA ON (dados ilustrativos)",
   "preco_atual": 9.0,
   "lpa": -0.5,
-  "vpa": 4.0,
-  "proventos": []
+  "vpa": 1.33,
+  "proventos": [],
+  "historico": [
+    {
+      "ano": 2014,
+      "lucro_liquido": 800000000.0,
+      "patrimonio_liquido": 8000000000.0,
+      "lpa": 0.13,
+      "dpa": 0.04
+    },
+    {
+      "ano": 2015,
+      "lucro_liquido": 960000000.0,
+      "patrimonio_liquido": 8000000000.0,
+      "lpa": 0.16,
+      "dpa": 0.05
+    },
+    {
+      "ano": 2016,
+      "lucro_liquido": 640000000.0,
+      "patrimonio_liquido": 8000000000.0,
+      "lpa": 0.11,
+      "dpa": 0.03
+    },
+    {
+      "ano": 2017,
+      "lucro_liquido": 400000000.0,
+      "patrimonio_liquido": 8000000000.0,
+      "lpa": 0.07,
+      "dpa": 0.01
+    },
+    {
+      "ano": 2018,
+      "lucro_liquido": -1600000000.0,
+      "patrimonio_liquido": 8000000000.0,
+      "lpa": -0.27,
+      "dpa": 0.1
+    },
+    {
+      "ano": 2019,
+      "lucro_liquido": -2800000000.0,
+      "patrimonio_liquido": 8000000000.0,
+      "lpa": -0.47,
+      "dpa": 0.1
+    },
+    {
+      "ano": 2020,
+      "lucro_liquido": -800000000.0,
+      "patrimonio_liquido": 8000000000.0,
+      "lpa": -0.13,
+      "dpa": 0.1
+    },
+    {
+      "ano": 2021,
+      "lucro_liquido": -400000000.0,
+      "patrimonio_liquido": 8000000000.0,
+      "lpa": -0.07,
+      "dpa": 0.1
+    },
+    {
+      "ano": 2022,
+      "lucro_liquido": -160000000.0,
+      "patrimonio_liquido": 8000000000.0,
+      "lpa": -0.03,
+      "dpa": 0.1
+    },
+    {
+      "ano": 2023,
+      "lucro_liquido": 80000000.0,
+      "patrimonio_liquido": 8000000000.0,
+      "lpa": 0.01,
+      "dpa": 0.0
+    },
+    {
+      "ano": 2024,
+      "lucro_liquido": -240000000.0,
+      "patrimonio_liquido": 8000000000.0,
+      "lpa": -0.04,
+      "dpa": 0.1
+    },
+    {
+      "ano": 2025,
+      "lucro_liquido": -80000000.0,
+      "patrimonio_liquido": 8000000000.0,
+      "lpa": -0.01,
+      "dpa": 0.1
+    }
+  ]
 }

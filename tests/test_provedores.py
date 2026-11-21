@@ -22,6 +22,8 @@ class TestArquivo(unittest.TestCase):
         d = ProvedorArquivoJson(EXEMPLOS).obter(Ticker("PETR4"))
         self.assertEqual(d.ticker, "PETR4")
         self.assertEqual(len(d.proventos), 5)
+        self.assertEqual(len(d.historico), 12)
+        self.assertEqual((d.historico[0].ano, d.historico[-1].ano), (2014, 2025))
 
     def test_ausente(self):
         with self.assertRaises(TickerNaoEncontradoError):
@@ -38,8 +40,21 @@ class TestArquivo(unittest.TestCase):
 
 
 class FakeYF:
-    def __init__(self, info, dividends):
+    def __init__(self, info, dividends, income_stmt=None, balance_sheet=None):
         self.info, self.dividends = info, dividends
+        self.income_stmt, self.balance_sheet = income_stmt, balance_sheet
+
+
+class FakeTabela:
+    """Imita o mínimo de um DataFrame do pandas: ``in .index`` e ``.loc[linha].items()``."""
+
+    def __init__(self, linhas):
+        self.index = list(linhas)
+        self._l = linhas
+
+    @property
+    def loc(self):
+        return {k: SerieFalsa(list(v.items())) for k, v in self._l.items()}
 
 
 class SerieFalsa:
@@ -60,6 +75,17 @@ class TestYFinance(unittest.TestCase):
         self.assertEqual(usado, ["PETR4.SA"])
         self.assertEqual((d.preco_atual, d.lpa, d.vpa), (38.5, 6.2, 28.0))
         self.assertEqual(d.proventos[0].data, date(2026, 5, 1))
+
+    def test_monta_historico_anual(self):
+        divs = SerieFalsa([(datetime(2023, 3, 1), 0.5), (datetime(2023, 9, 1), 0.7), (datetime(2024, 3, 1), 1.0)])
+        dre = FakeTabela({"Net Income": {datetime(2023, 12, 31): 200.0, datetime(2024, 12, 31): 220.0},
+                          "Diluted EPS": {datetime(2023, 12, 31): 2.0, datetime(2024, 12, 31): 2.2}})
+        bp = FakeTabela({"Stockholders Equity": {datetime(2023, 12, 31): 1000.0, datetime(2024, 12, 31): float("nan")}})
+        d = ProvedorYFinance(lambda s: FakeYF({"currentPrice": 10.0, "bookValue": 8.0}, divs, dre, bp)).obter(Ticker("PETR4"))
+        self.assertEqual([r.ano for r in d.historico], [2023])        # 2024 sem PL (NaN) é descartado
+        r = d.historico[0]
+        self.assertEqual((r.lucro_liquido, r.patrimonio_liquido, r.lpa), (200.0, 1000.0, 2.0))
+        self.assertAlmostEqual(r.dpa, 1.2)                             # 0,5 + 0,7 pagos em 2023
 
     def test_sem_preco_nao_encontrado(self):
         prov = ProvedorYFinance(lambda s: FakeYF({}, SerieFalsa([])))

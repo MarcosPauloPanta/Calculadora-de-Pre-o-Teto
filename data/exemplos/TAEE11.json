@@ -2,7 +2,7 @@
   "nome": "TAESA UNIT (dados ilustrativos)",
   "preco_atual": 11.0,
   "lpa": 2.4,
-  "vpa": 10.0,
+  "vpa": 9.61,
   "proventos": [
     {
       "data": "2026-02-15",
@@ -19,6 +19,92 @@
     {
       "data": "2026-11-15",
       "valor": 0.9
+    }
+  ],
+  "historico": [
+    {
+      "ano": 2014,
+      "lucro_liquido": 1248000000.0,
+      "patrimonio_liquido": 6240000000.0,
+      "lpa": 1.25,
+      "dpa": 1.12
+    },
+    {
+      "ano": 2015,
+      "lucro_liquido": 1427712000.0,
+      "patrimonio_liquido": 6489600000.0,
+      "lpa": 1.43,
+      "dpa": 1.36
+    },
+    {
+      "ano": 2016,
+      "lucro_liquido": 1282344960.0,
+      "patrimonio_liquido": 6749184000.0,
+      "lpa": 1.28,
+      "dpa": 1.13
+    },
+    {
+      "ano": 2017,
+      "lucro_liquido": 1474021786.0,
+      "patrimonio_liquido": 7019151360.0,
+      "lpa": 1.47,
+      "dpa": 1.54
+    },
+    {
+      "ano": 2018,
+      "lucro_liquido": 1678981005.0,
+      "patrimonio_liquido": 7299917414.0,
+      "lpa": 1.68,
+      "dpa": 1.55
+    },
+    {
+      "ano": 2019,
+      "lucro_liquido": 1518382822.0,
+      "patrimonio_liquido": 7591914111.0,
+      "lpa": 1.52,
+      "dpa": 1.37
+    },
+    {
+      "ano": 2020,
+      "lucro_liquido": 1421206322.0,
+      "patrimonio_liquido": 7895590675.0,
+      "lpa": 1.42,
+      "dpa": 1.35
+    },
+    {
+      "ano": 2021,
+      "lucro_liquido": 1970739433.0,
+      "patrimonio_liquido": 8211414302.0,
+      "lpa": 1.97,
+      "dpa": 1.67
+    },
+    {
+      "ano": 2022,
+      "lucro_liquido": 1793372884.0,
+      "patrimonio_liquido": 8539870875.0,
+      "lpa": 1.79,
+      "dpa": 1.61
+    },
+    {
+      "ano": 2023,
+      "lucro_liquido": 1953922456.0,
+      "patrimonio_liquido": 8881465710.0,
+      "lpa": 1.95,
+      "dpa": 1.81
+    },
+    {
+      "ano": 2024,
+      "lucro_liquido": 1847344868.0,
+      "patrimonio_liquido": 9236724338.0,
+      "lpa": 1.85,
+      "dpa": 1.68
+    },
+    {
+      "ano": 2025,
+      "lucro_liquido": 2017300595.0,
+      "patrimonio_liquido": 9606193311.0,
+      "lpa": 2.02,
+      "dpa": 1.82
     }
   ]
 }

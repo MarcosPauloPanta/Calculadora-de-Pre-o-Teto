@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Any
 
 from preco_teto.exceptions import DadosInvalidosError, TickerNaoEncontradoError
-from preco_teto.models import DadosMercado, Provento
+from preco_teto.models import DadosMercado, Provento, RegistroAnual
 from preco_teto.provedores.base import ProvedorDados
 from preco_teto.ticker import Ticker
 
@@ -40,6 +40,11 @@ class ProvedorArquivoJson(ProvedorDados):
                 Provento(date.fromisoformat(p["data"]), float(p["valor"]))
                 for p in bruto.get("proventos", [])
             )
+            historico = tuple(
+                RegistroAnual(int(h["ano"]), float(h["lucro_liquido"]), float(h["patrimonio_liquido"]),
+                              float(h["lpa"]), float(h["dpa"]))
+                for h in bruto.get("historico", [])
+            )
             return DadosMercado(
                 ticker=ticker.simbolo,
                 nome=bruto["nome"],
@@ -47,6 +52,7 @@ class ProvedorArquivoJson(ProvedorDados):
                 lpa=bruto.get("lpa"),
                 vpa=bruto.get("vpa"),
                 proventos=proventos,
+                historico=historico,
             )
         except (KeyError, TypeError, ValueError, AttributeError) as exc:
             raise DadosInvalidosError(f"{origem}: formato inesperado ({exc!r}).") from exc

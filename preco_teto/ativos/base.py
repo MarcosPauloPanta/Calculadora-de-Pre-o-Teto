@@ -5,6 +5,7 @@ from abc import ABC, abstractmethod
 from datetime import date
 from typing import Optional, Sequence
 
+from preco_teto.analise import ParametrosValuation
 from preco_teto.exceptions import (
     DadosInsuficientesError,
     DadosInvalidosError,
@@ -31,6 +32,7 @@ class Ativo(ABC):
         ticker: Ticker,
         dados: DadosMercado,
         metodos: Optional[Sequence[MetodoPrecoTeto]] = None,
+        params: Optional[ParametrosValuation] = None,
     ) -> None:
         if dados.ticker != ticker.simbolo:
             raise DadosInvalidosError(
@@ -39,13 +41,14 @@ class Ativo(ABC):
         self._ticker = ticker
         self._dados = dados
         self._metodos: tuple[MetodoPrecoTeto, ...] = (
-            tuple(metodos) if metodos is not None else tuple(self.metodos_padrao())
+            tuple(metodos) if metodos is not None
+            else tuple(self.metodos_padrao(params or ParametrosValuation()))
         )
 
     @classmethod
     @abstractmethod
-    def metodos_padrao(cls) -> list[MetodoPrecoTeto]:
-        """Métodos de valuation recomendados para este tipo de ativo."""
+    def metodos_padrao(cls, params: ParametrosValuation) -> list[MetodoPrecoTeto]:
+        """Métodos de valuation recomendados para este tipo de ativo, já parametrizados."""
 
     @property
     def ticker(self) -> Ticker:

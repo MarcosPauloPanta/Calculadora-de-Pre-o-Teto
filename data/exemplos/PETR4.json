@@ -2,7 +2,7 @@
   "nome": "PETROBRAS PN (dados ilustrativos)",
   "preco_atual": 38.5,
   "lpa": 6.2,
-  "vpa": 28.0,
+  "vpa": 21.93,
   "proventos": [
     {
       "data": "2025-08-20",
@@ -23,6 +23,92 @@
     {
       "data": "2026-11-05",
       "valor": 1.05
+    }
+  ],
+  "historico": [
+    {
+      "ano": 2014,
+      "lucro_liquido": 10300000000.0,
+      "patrimonio_liquido": 206000000000.0,
+      "lpa": 0.79,
+      "dpa": 0.32
+    },
+    {
+      "ano": 2015,
+      "lucro_liquido": -21218000000.0,
+      "patrimonio_liquido": 212180000000.0,
+      "lpa": -1.63,
+      "dpa": 0.1
+    },
+    {
+      "ano": 2016,
+      "lucro_liquido": 6556362000.0,
+      "patrimonio_liquido": 218545400000.0,
+      "lpa": 0.5,
+      "dpa": 0.15
+    },
+    {
+      "ano": 2017,
+      "lucro_liquido": 18008140960.0,
+      "patrimonio_liquido": 225101762000.0,
+      "lpa": 1.39,
+      "dpa": 0.69
+    },
+    {
+      "ano": 2018,
+      "lucro_liquido": 27822577783.0,
+      "patrimonio_liquido": 231854814860.0,
+      "lpa": 2.14,
+      "dpa": 1.28
+    },
+    {
+      "ano": 2019,
+      "lucro_liquido": 9552418372.0,
+      "patrimonio_liquido": 238810459306.0,
+      "lpa": 0.73,
+      "dpa": 0.36
+    },
+    {
+      "ano": 2020,
+      "lucro_liquido": 54114450079.0,
+      "patrimonio_liquido": 245974773085.0,
+      "lpa": 4.16,
+      "dpa": 2.91
+    },
+    {
+      "ano": 2021,
+      "lucro_liquido": 114009307325.0,
+      "patrimonio_liquido": 253354016278.0,
+      "lpa": 8.77,
+      "dpa": 7.02
+    },
+    {
+      "ano": 2022,
+      "lucro_liquido": 78286391030.0,
+      "patrimonio_liquido": 260954636766.0,
+      "lpa": 6.02,
+      "dpa": 5.42
+    },
+    {
+      "ano": 2023,
+      "lucro_liquido": 53756655174.0,
+      "patrimonio_liquido": 268783275869.0,
+      "lpa": 4.14,
+      "dpa": 3.1
+    },
+    {
+      "ano": 2024,
+      "lucro_liquido": 49832419346.0,
+      "patrimonio_liquido": 276846774145.0,
+      "lpa": 3.83,
+      "dpa": 2.3
+    },
+    {
+      "ano": 2025,
+      "lucro_liquido": 54178913700.0,
+      "patrimonio_liquido": 285152177369.0,
+      "lpa": 4.17,
+      "dpa": 2.29
     }
   ]
 }

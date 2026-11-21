@@ -33,6 +33,27 @@ class Provento:
 
 
 @dataclass(frozen=True)
+class RegistroAnual:
+    """Um exercício anual da empresa (valores por ação em R$, totais na mesma unidade)."""
+
+    ano: int
+    lucro_liquido: float
+    patrimonio_liquido: float
+    lpa: float  # lucro por ação
+    dpa: float  # dividendos + JCP pagos por ação no ano
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.ano, int) or isinstance(self.ano, bool):
+            raise DadosInvalidosError(f"Ano inválido: {self.ano!r}")
+        for rotulo, v in (("lucro_liquido", self.lucro_liquido), ("patrimonio_liquido", self.patrimonio_liquido),
+                          ("lpa", self.lpa), ("dpa", self.dpa)):
+            if not _finito(v):
+                raise DadosInvalidosError(f"{self.ano}: {rotulo} inválido ({v!r}).")
+        if self.dpa < 0:
+            raise DadosInvalidosError(f"{self.ano}: dpa não pode ser negativo ({self.dpa!r}).")
+
+
+@dataclass(frozen=True)
 class DadosMercado:
     """Foto dos dados necessários para calcular o preço teto de um ticker."""
 
@@ -42,6 +63,7 @@ class DadosMercado:
     lpa: Optional[float] = None  # lucro por ação (últimos 12m)
     vpa: Optional[float] = None  # valor patrimonial por ação
     proventos: tuple[Provento, ...] = field(default_factory=tuple)
+    historico: tuple[RegistroAnual, ...] = field(default_factory=tuple)  # exercícios anuais
 
     def __post_init__(self) -> None:
         if not _finito(self.preco_atual) or self.preco_atual <= 0:
@@ -49,8 +71,14 @@ class DadosMercado:
         for rotulo, valor in (("LPA", self.lpa), ("VPA", self.vpa)):
             if valor is not None and not _finito(valor):
                 raise DadosInvalidosError(f"{self.ticker}: {rotulo} inválido ({valor!r}).")
+        anos = [r.ano for r in self.historico]
+        if len(anos) != len(set(anos)):
+            raise DadosInvalidosError(f"{self.ticker}: histórico anual com anos repetidos.")
         object.__setattr__(
             self, "proventos", tuple(sorted(self.proventos, key=lambda p: p.data))
+        )
+        object.__setattr__(
+            self, "historico", tuple(sorted(self.historico, key=lambda r: r.ano))
         )
 
     def total_proventos(self, meses: int, hoje: date) -> float:
@@ -66,6 +94,8 @@ class ResultadoMetodo:
     metodo: str
     preco_teto: float
     detalhe: str
+    # Memória de cálculo (tabelas/estatísticas) para o usuário auditar; não é persistida.
+    analise: Any = field(default=None, compare=False, repr=False)
 
     def to_dict(self) -> dict[str, Any]:
         return {"metodo": self.metodo, "preco_teto": self.preco_teto, "detalhe": self.detalhe}

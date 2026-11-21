@@ -1,11 +1,15 @@
 """Provedor online baseado na biblioteca ``yfinance`` (Yahoo Finance; sem chave de API).
 
-Tickers da B3 usam o sufixo ``.SA``. Campos usados:
-``currentPrice``/``regularMarketPrice``, ``trailingEps`` (LPA), ``bookValue``
-(VPA), ``longName`` e a série ``dividends``.
+Tickers da B3 usam o sufixo ``.SA``. Campos usados: ``currentPrice``, ``bookValue`` (VPA),
+``longName``, a série ``dividends`` e, para o histórico anual, ``income_stmt`` (Net Income,
+EPS) e ``balance_sheet`` (Stockholders Equity).
+
+LIMITAÇÃO: o Yahoo costuma entregar só ~4-5 exercícios anuais nas demonstrações (os dividendos
+vêm de bem mais longe). Para 10+ anos de ROE, a próxima fonte a construir é a CVM (dados abertos).
 """
 from __future__ import annotations
 
+import math
 from typing import Any, Callable, Optional
 
 from preco_teto.exceptions import (
@@ -13,7 +17,7 @@ from preco_teto.exceptions import (
     ProvedorIndisponivelError,
     TickerNaoEncontradoError,
 )
-from preco_teto.models import DadosMercado, Provento
+from preco_teto.models import DadosMercado, Provento, RegistroAnual
 from preco_teto.provedores.base import ProvedorDados
 from preco_teto.ticker import Ticker
 
@@ -42,6 +46,9 @@ class ProvedorYFinance(ProvedorDados):
         try:
             info = cliente.info or {}
             serie = cliente.dividends
+            lucro = _serie_anual(cliente.income_stmt, ('Net Income Common Stockholders', 'Net Income'))
+            lpa = _serie_anual(cliente.income_stmt, ('Diluted EPS', 'Basic EPS'))
+            pl = _serie_anual(cliente.balance_sheet, ('Stockholders Equity', 'Common Stock Equity'))
         except _erros_yfinance() as exc:
             raise ProvedorIndisponivelError(f"Falha ao consultar o Yahoo Finance: {exc}") from exc
 
@@ -52,6 +59,13 @@ class ProvedorYFinance(ProvedorDados):
             proventos = tuple(
                 Provento(ts.date(), float(valor)) for ts, valor in serie.items()
             )
+            dpa_ano: dict[int, float] = {}
+            for p in proventos:
+                dpa_ano[p.data.year] = dpa_ano.get(p.data.year, 0.0) + p.valor
+            historico = tuple(
+                RegistroAnual(ano, lucro[ano], pl[ano], lpa[ano], dpa_ano.get(ano, 0.0))
+                for ano in sorted(set(lucro) & set(pl) & set(lpa))
+            )
             return DadosMercado(
                 ticker=ticker.simbolo,
                 nome=info.get("longName") or info.get("shortName") or ticker.simbolo,
@@ -59,9 +73,24 @@ class ProvedorYFinance(ProvedorDados):
                 lpa=info.get("trailingEps"),
                 vpa=info.get("bookValue"),
                 proventos=proventos,
+                historico=historico,
             )
         except (AttributeError, TypeError, ValueError) as exc:
             raise DadosInvalidosError(f"Resposta inesperada do Yahoo para {ticker}: {exc!r}") from exc
+
+
+def _serie_anual(tabela: Any, nomes: tuple[str, ...]) -> dict[int, float]:
+    """Extrai {ano: valor} da primeira linha existente em ``nomes`` (ignora NaN)."""
+    if tabela is None:
+        return {}
+    for nome in nomes:
+        if nome in tabela.index:
+            return {
+                ts.year: float(v)
+                for ts, v in tabela.loc[nome].items()
+                if v is not None and math.isfinite(float(v))
+            }
+    return {}
 
 
 def _erros_yfinance() -> tuple[type[BaseException], ...]:

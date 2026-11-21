@@ -1,9 +1,4 @@
-"""Métodos baseados em proventos: Bazin (ações) e DY alvo (FIIs).
-
-``MetodoPorDividendos`` é a especialização comum; ``MetodoBazin`` e
-``MetodoDYFii`` só fixam nome e parâmetros-padrão. Herança usada porque as três
-classes são realmente a mesma regra (teto = provento anual / yield alvo).
-"""
+"""Método por dividend yield alvo (usado para FIIs): teto = proventos anualizados / yield alvo."""
 from __future__ import annotations
 
 from datetime import date
@@ -47,13 +42,6 @@ class MetodoPorDividendos(MetodoPrecoTeto):
             f"/ yield alvo {self._yield_alvo:.2%} = {teto:.2f}"
         )
         return ResultadoMetodo(self._nome, teto, detalhe)
-
-
-class MetodoBazin(MetodoPorDividendos):
-    """Método de Décio Bazin: pagar no máximo o preço que rende 6% a.a. em dividendos."""
-
-    def __init__(self, yield_alvo: float = 0.06, janela_meses: int = 12) -> None:
-        super().__init__("Bazin", yield_alvo, janela_meses)
 
 
 class MetodoDYFii(MetodoPorDividendos):

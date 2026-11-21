@@ -3,50 +3,51 @@ from __future__ import annotations
 
 from typing import Optional, Sequence
 
+from preco_teto.analise import ParametrosValuation
 from preco_teto.ativos.base import Ativo
 from preco_teto.classificador import TipoAtivo
-from preco_teto.metodos import MetodoBazin, MetodoDYFii, MetodoGraham, MetodoPrecoTeto
+from preco_teto.metodos import MetodoDYFii, MetodoGordon, MetodoPrecoTeto, MetodoPVPJustificado
 from preco_teto.models import DadosMercado
 from preco_teto.ticker import Ticker
 
 
 class Acao(Ativo):
-    """Ações (e units): Bazin (renda) e Graham (lucro + patrimônio)."""
+    """Ações (e units): P/VP justificado e Gordon, ambos com g = ROE(1-payout) e k do usuário."""
 
     rotulo_tipo = "ACAO"
 
     @classmethod
-    def metodos_padrao(cls) -> list[MetodoPrecoTeto]:
-        return [MetodoBazin(), MetodoGraham()]
+    def metodos_padrao(cls, params: ParametrosValuation) -> list[MetodoPrecoTeto]:
+        return [MetodoPVPJustificado(params), MetodoGordon(params)]
 
 
 class FundoImobiliario(Ativo):
-    """FIIs: valem os rendimentos distribuídos, não lucro contábil (Graham não se aplica)."""
+    """FIIs: valem os rendimentos distribuídos (lucro contábil/ROE não se aplicam)."""
 
     rotulo_tipo = "FII"
 
     @classmethod
-    def metodos_padrao(cls) -> list[MetodoPrecoTeto]:
+    def metodos_padrao(cls, params: ParametrosValuation) -> list[MetodoPrecoTeto]:
         return [MetodoDYFii()]
 
 
 class Bdr(Ativo):
-    """BDRs: proventos em BRL são pouco representativos; usa-se apenas Graham."""
+    """BDRs: ainda sem método (sem histórico da empresa no exterior nesta base)."""
 
     rotulo_tipo = "BDR"
 
     @classmethod
-    def metodos_padrao(cls) -> list[MetodoPrecoTeto]:
-        return [MetodoGraham()]
+    def metodos_padrao(cls, params: ParametrosValuation) -> list[MetodoPrecoTeto]:
+        return []
 
 
 class Etf(Ativo):
-    """ETFs não têm lucro/dividendo próprio para esses métodos: sem método de teto."""
+    """ETFs não têm lucro/dividendo próprio para esses métodos."""
 
     rotulo_tipo = "ETF"
 
     @classmethod
-    def metodos_padrao(cls) -> list[MetodoPrecoTeto]:
+    def metodos_padrao(cls, params: ParametrosValuation) -> list[MetodoPrecoTeto]:
         return []
 
 
@@ -68,5 +69,6 @@ class FabricaAtivos:
         ticker: Ticker,
         dados: DadosMercado,
         metodos: Optional[Sequence[MetodoPrecoTeto]] = None,
+        params: Optional[ParametrosValuation] = None,
     ) -> Ativo:
-        return cls._REGISTRO[tipo](ticker, dados, metodos)
+        return cls._REGISTRO[tipo](ticker, dados, metodos, params)
