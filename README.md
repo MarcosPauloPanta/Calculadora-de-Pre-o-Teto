@@ -1,124 +1,85 @@
-# Calculadora de Preço Teto (B3) — v0.2 (base simples)
+# Calculadora de Preço Teto (B3)
 
-Trabalho final de Computação II (UFRJ). Integrantes: _(preencher nome e DRE)_.
+Trabalho acadêmico de Computação II (UFRJ). Ferramenta didática para estudar coleta de dados financeiros, estatística e métodos de valuation. **Não é recomendação de investimento.**
 
-Dado um ticker, o programa busca os dados, **classifica o ativo** (ação, unit, FII, BDR, ETF) e aplica o método do tipo.
-Para ações, o modelo é de **crescimento sustentável** com retorno exigido **k escolhido pelo usuário**:
+## Executar pelo IDLE (Python 3.14)
 
+O projeto possui um menu interativo para facilitar a execução em ambiente de aula.
+
+1. Baixe o ZIP do repositório/branch e extraia a pasta inteira, preservando a estrutura de diretórios.
+2. Abra o IDLE do Python 3.14.
+3. No IDLE, use **File > Open...** e abra o arquivo `main.py` que está na pasta principal do projeto.
+4. Pressione **F5** (Run > Run Module).
+5. O menu será exibido no Shell do IDLE.
+
+Não abra somente o arquivo `main.py` fora da pasta: os diretórios `preco_teto` e `data` precisam permanecer ao lado dele.
+
+### O que funciona sem instalar bibliotecas adicionais
+
+- Menu do IDLE.
+- Exemplo offline com dados fictícios incluídos no projeto.
+- Consulta e exportação dos demonstrativos CVM (usa apenas a biblioteca padrão do Python e requer internet).
+- Histórico e exportação CSV, conforme as funcionalidades existentes.
+
+### Fontes online de cotação e histórico
+
+A opção de cálculo online usa `yfinance`, que é uma dependência externa. Para instalá-la no mesmo Python 3.14 utilizado pelo IDLE, abra o Prompt de Comando do Windows e execute:
+
+```text
+py -3.14 -m pip install -r requirements.txt
 ```
-ROE    = lucro líquido / patrimônio líquido (por ano)
-payout = DPA / LPA (limitado a 100%)
-g      = ROE x (1 - payout)
-P/VP justo = (ROE - g) / (k - g)      -> teto = P/VP justo x VPA atual
-VF (Gordon) = D x (1 + g) / (k - g)
+
+Se o comando `py -3.14` não existir, use o caminho do interpretador que aparece em **Help > About IDLE** ou execute `python -m pip install -r requirements.txt` no terminal associado à instalação correta.
+
+A instalação de uma biblioteca no Python de outra versão não a disponibiliza automaticamente no Python 3.14.
+
+## Executar pelo terminal (opcional)
+
+O modo de linha de comando foi preservado:
+
+```bash
+python main.py analisar PETR4 --fonte arquivo
+python main.py calcular PETR4 --fonte arquivo --k 12% --tabelas
+python -m preco_teto.cvm_cli WEGE3 --anos 5 --tipo ambos
 ```
 
-ROE, payout e D vêm de uma janela de **10 anos** (configurável). Para cada variável o programa mostra
-média, mediana, média aparada e último valor, **recomenda** uma medida (e explica por quê) e deixa você
-**escolher a sua**. O preço teto final é o menor entre os dois métodos.
+## Métodos e limites atuais
 
-| Tipo | Método |
+| Tipo | Método implementado no projeto |
 |---|---|
-| Ação / Unit | P/VP justificado e Gordon (exigem `--k`) |
-| FII | DY alvo de 8% sobre os rendimentos de 12 meses |
-| BDR / ETF | ainda sem método (mensagem clara) |
+| Ação / Unit | P/VP justificado e Gordon (exigem retorno exigido `k`) |
+| FII | DY alvo configurado no método |
+| BDR / ETF | Sem método de preço teto nesta versão |
 
-> Ferramenta didática. Não é recomendação de investimento.
+O cálculo depende da qualidade, disponibilidade e consistência dos dados da fonte escolhida. A fonte Yahoo Finance pode fornecer histórico anual curto ou incompleto. Os resultados precisam ser conferidos antes de qualquer interpretação.
 
-## Escolhendo a medida (média, mediana...)
+## Integração com a CVM: etapa de coleta, não valuation completo
 
-Com `auto` (padrão), a recomendação segue uma regra simples e auditável:
+O módulo `preco_teto.provedores.cvm` resolve ticker por meio do FCA e baixa demonstrativos DFP e ITR. A opção 3 do menu do IDLE permite exportar os dados para CSV em `data/cvm`; os ZIPs oficiais ficam em `.cache/cvm`.
 
-* menos de 4 anos: média;
-* algum outlier (regra de Tukey **e** afastado da mediana em mais de 20%): mediana;
-* coeficiente de variação > 50%: mediana;
-* senão: média.
+**Importante:** a coleta CVM ainda não alimenta diretamente os métodos de preço teto. As demonstrações são dados da companhia, e a conversão em indicadores por ação exige seleção contábil, quantidade de ações por período, proventos e eventos societários consistentes. Não interprete os CSVs brutos como preço justo.
 
-Você sempre pode forçar: `--estat-roe mediana`, `--estat-payout media`, `--estat-dpa aparada` (ou `ultimo`).
-
-## Instalação
-
-Python 3.10+. A dependência só é necessária para dados online (`yfinance`/`auto`):
-
-```bash
-pip install -r requirements.txt
-```
-
-## Execução
-
-Ver as tabelas e estatísticas **antes** de escolher o k (não exige `--k`):
-
-```bash
-python main.py analisar PETR4 TAEE11 --fonte arquivo
-```
-
-Calcular com k de 12% ao ano (aceita `0.12`, `12` ou `12%`) e mostrar as tabelas usadas:
-
-```bash
-python main.py calcular PETR4 TAEE11 --fonte arquivo --k 12% --tabelas
-python main.py calcular PETR4 --fonte arquivo --k 12% --estat-roe media --estat-dpa media   # sua escolha
-python main.py calcular PETR4 --fonte arquivo --k 12% --exportar-csv saida/                 # CSV para auditar
-python main.py historico
-```
-
-Resultado esperado com os dados de exemplo e `--k 12%`: PETR4 teto R$ 49,69 e TAEE11 R$ 15,49 (método Gordon,
-conferidos com um cálculo independente); `MGLU3` (prejuízos) e `BOVA11` (ETF) geram erros claros e código de saída 1.
-
-Dados online: `python main.py calcular PETR4 ITUB4 --k 12%` (fonte `auto`: yfinance, depois brapi).
+Detalhes técnicos: [docs/CVM_PIPELINE.md](docs/CVM_PIPELINE.md).
 
 ## Testes
+
+Na raiz do projeto, pelo terminal:
 
 ```bash
 python -m unittest discover -s tests -t . -v
 ```
 
-## Estrutura
+Os testes automatizados são complementares; a coleta ao vivo depende da disponibilidade dos serviços externos.
 
+## Estrutura principal
+
+```text
+main.py                       ponto de entrada para IDLE e terminal
+preco_teto/                   domínio, métodos, provedores e serviços
+  provedores/cvm.py            coleta oficial FCA/DFP/ITR
+  cvm_cli.py                   exportação de dados CVM
+data/exemplos/                 dados fictícios para demonstração offline
+tests/                         testes automatizados
+docs/                          documentação técnica
+requirements.txt               dependências externas opcionais
 ```
-main.py
-preco_teto/
-  ticker.py, classificador.py     ticker -> TipoAtivo
-  models.py                       DadosMercado, RegistroAnual (histórico), resultados
-  estatisticas.py                 resumo estatístico + recomendação de medida
-  analise.py                      ParametrosValuation, tabela anual, AnaliseHistorica
-  metodos/                        contrato MetodoPrecoTeto; PVP justificado, Gordon, DY FII
-  ativos/                         Ativo (abstrata) + Acao, FundoImobiliario, Bdr, Etf + fábrica
-  provedores/                     contrato ProvedorDados; arquivo JSON, yfinance, brapi, fallback
-  repositorio.py, exportacao.py   histórico JSON (atômico) e CSV das tabelas
-  servico.py, cli.py              orquestração e linha de comando
-tests/                            78 testes (unittest)
-data/exemplos/                    dados FICTÍCIOS (12 anos) para execução offline
-```
-
-## Fontes de dados e limitações (leia)
-
-- **yfinance**: dá preço, VPA e dividendos de longo prazo, mas as demonstrações anuais (lucro, patrimônio, LPA)
-  costumam vir com **só ~4-5 anos**. Com menos de `--min-anos` anos válidos o programa avisa e recusa o cálculo.
-- **Próxima fonte recomendada para 10+ anos de ROE: CVM dados abertos** (DFP anual desde 2010, grátis, sem chave).
-  Falta mapear ticker -> CNPJ e ações em circulação; ficou para a próxima etapa.
-- **brapi.dev**: traz preço e dividendos; o histórico anual ainda não foi integrado. Tickers fora de
-  PETR4/VALE3/MGLU3/ITUB4 exigem token (`BRAPI_TOKEN`).
-- As fontes online não foram executadas ao vivo no ambiente de desenvolvimento (sem internet); foram testadas com
-  respostas simuladas. Validar com dados reais.
-- Se g >= k o modelo diverge e o programa recusa o cálculo (aumente k ou escolha outra medida).
-- Dados de exemplo são fictícios.
-
-
-## Integração inicial com a CVM (em desenvolvimento)
-
-A coleta oficial foi iniciada em `preco_teto/provedores/cvm.py`. O módulo resolve ticker via FCA e baixa DFP anual, preservando contas contábeis, versão, grupo, período, moeda, escala e arquivo de origem. Os ZIPs ficam em `.cache/cvm` (não devem ser versionados).
-
-Esta primeira etapa **não gera preço teto com dados CVM ainda**: DFP fornece valores da companhia, enquanto LPA/DPA por ação exigem quantidade de ações e proventos consistentes. Também é necessária uma fonte independente para cotação atual. Consulte [docs/CVM_PIPELINE.md](docs/CVM_PIPELINE.md) antes de interpretar os dados.
-
-Fontes oficiais: [FCA](https://dados.cvm.gov.br/dataset/cia_aberta-doc-fca) · [DFP](https://dados.cvm.gov.br/dataset/cia_aberta-doc-dfp).
-
-
-### Testar a coleta CVM
-
-Com Python instalado e na raiz do projeto:
-
-```powershell
-python -m preco_teto.cvm_cli WEGE3 --anos 5 --tipo ambos
-```
-
-Os CSVs serão gravados em `data/cvm`; os ZIPs oficiais ficam em `.cache/cvm`. Veja [docs/CVM_PIPELINE.md](docs/CVM_PIPELINE.md).
