@@ -59,7 +59,12 @@ def trimestres_isolados(
     acumulados: dict[tuple[int, int, tuple[str, str, str, str, str]], ContaContabilCVM] = {}
     anuais: dict[tuple[int, tuple[str, str, str, str, str]], ContaContabilCVM] = {}
 
+    demonstracoes_de_fluxo = {"DRE", "DFC_MI", "DFC_MD", "DVA", "DRA"}
+
     for conta in itr:
+        # BPA/BPP são saldos em uma data, não fluxos acumulados.
+        if conta.demonstracao not in demonstracoes_de_fluxo:
+            continue
         mes = conta.data_referencia.month
         if mes not in (3, 6, 9):
             continue
