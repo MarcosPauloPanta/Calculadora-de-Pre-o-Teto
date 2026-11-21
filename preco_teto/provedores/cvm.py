@@ -34,7 +34,7 @@ _TIPOS_ITR = ("DRE", "BPA", "BPP", "DFC_MI", "DFC_MD", "DMPL", "DRA", "DVA")
 
 
 def _normalizar_coluna(texto: str) -> str:
-    texto = unicodedata.normalize("NFKD", texto or "")
+    texto = unicodedata.normalize("NFKD", (texto or "").lstrip("\ufeff"))
     texto = "".join(c for c in texto if not unicodedata.combining(c))
     return re.sub(r"[^A-Z0-9]", "", texto.upper())
 
@@ -103,8 +103,14 @@ class ContaContabilCVM:
     def valor(self) -> float:
         """Valor convertido para unidade monetária, preservando valor/escala originais."""
         escala = _normalizar_coluna(self.escala_moeda)
-        fator = {"UNIDADE": 1.0, "MIL": 1_000.0, "MILHAR": 1_000.0,
-                 "MILHAO": 1_000_000.0, "BILHAO": 1_000_000_000.0}.get(escala, 1.0)
+        if escala.startswith("BILHAO"):
+            fator = 1_000_000_000.0
+        elif escala.startswith("MILHAO"):
+            fator = 1_000_000.0
+        elif escala.startswith(("MIL", "MILHAR")):
+            fator = 1_000.0
+        else:
+            fator = 1.0
         return self.valor_original * fator
 
 
@@ -171,11 +177,12 @@ class ClienteCVM:
                         amostra = texto.read(4096)
                         texto.seek(0)
                         try:
-                            dialeto = csv.Sniffer().sniff(amostra, delimiters=";,\t")
+                            dialeto = csv.Sniffer().sniff(amostra, delimiters=";,\\t")
                         except csv.Error:
-                            dialeto = csv.excel
-                            dialeto.delimiter = ";"
-                        for linha in csv.DictReader(texto, dialect=dialeto):
+                            leitor = csv.DictReader(texto, delimiter=";")
+                        else:
+                            leitor = csv.DictReader(texto, dialect=dialeto)
+                        for linha in leitor:
                             yield nome, linha
         except (zipfile.BadZipFile, OSError, UnicodeError) as exc:
             raise DadosInvalidosError(f"Não foi possível ler arquivo CSV da CVM: {exc}") from exc
