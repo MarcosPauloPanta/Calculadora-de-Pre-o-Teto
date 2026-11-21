@@ -62,3 +62,20 @@ O método `ClienteCVM.obter_relatorio_trimestral("WEGE3", anos=5)` baixa os arqu
 - Contas e grupos não são misturados; cada resultado mantém a origem.
 
 **Atenção:** a regra de diferença acumulada é adequada para contas de fluxo (DRE/DFC). Não se deve aplicar essa transformação a contas patrimoniais de estoque (BPA/BPP), que representam posição em uma data. Para balanços, use diretamente a posição de fechamento do trimestre. A integração de indicadores ainda deve selecionar os tipos de conta apropriados.
+
+
+## Executar a coleta pelo terminal
+
+Com o ambiente virtual ativado e a raiz do repositório como diretório atual:
+
+```powershell
+python -m preco_teto.cvm_cli WEGE3 --anos 5 --tipo ambos
+```
+
+O comando identifica a companhia pelo FCA, baixa DFP e ITR, usa cache em `.cache/cvm` e exporta CSVs em `data/cvm`. Para baixar apenas DFP:
+
+```powershell
+python -m preco_teto.cvm_cli PETR4 --anos 10 --tipo dfp
+```
+
+O CSV contém os valores originais, escala monetária e valor convertido, além dos campos de rastreabilidade. Ele é uma exportação de demonstrações brutas normalizadas, não um preço teto.

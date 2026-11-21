@@ -111,3 +111,14 @@ A coleta oficial foi iniciada em `preco_teto/provedores/cvm.py`. O módulo resol
 Esta primeira etapa **não gera preço teto com dados CVM ainda**: DFP fornece valores da companhia, enquanto LPA/DPA por ação exigem quantidade de ações e proventos consistentes. Também é necessária uma fonte independente para cotação atual. Consulte [docs/CVM_PIPELINE.md](docs/CVM_PIPELINE.md) antes de interpretar os dados.
 
 Fontes oficiais: [FCA](https://dados.cvm.gov.br/dataset/cia_aberta-doc-fca) · [DFP](https://dados.cvm.gov.br/dataset/cia_aberta-doc-dfp).
+
+
+### Testar a coleta CVM
+
+Com Python instalado e na raiz do projeto:
+
+```powershell
+python -m preco_teto.cvm_cli WEGE3 --anos 5 --tipo ambos
+```
+
+Os CSVs serão gravados em `data/cvm`; os ZIPs oficiais ficam em `.cache/cvm`. Veja [docs/CVM_PIPELINE.md](docs/CVM_PIPELINE.md).
