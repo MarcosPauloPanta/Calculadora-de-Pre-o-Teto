@@ -1,1 +1,3 @@
-yfinance==1.8.0
+# Dependência externa usada somente pelas fontes online baseadas no Yahoo Finance.
+# O menu do IDLE, os exemplos offline e o coletor CVM usam a biblioteca padrão.
+yfinance>=0.2.54,<2.0
