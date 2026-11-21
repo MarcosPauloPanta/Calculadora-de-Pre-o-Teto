@@ -48,3 +48,17 @@ for conta in relatorio.contas:
 - calcular lucro atribuível aos controladores, PL, dívida líquida, FCO e capex;
 - integrar proventos e quantidade de ações, com eventos societários/desdobramentos;
 - compor os dados CVM com uma fonte separada de cotação e só então habilitar preço teto automático.
+
+
+## ITR e trimestre isolado
+
+O método `ClienteCVM.obter_relatorio_trimestral("WEGE3", anos=5)` baixa os arquivos ITR. Para DRE/DFC, os dados podem estar acumulados no exercício. Use `trimestres_isolados(itr.contas, dfp.contas)` para derivar Q1, Q2, Q3 e Q4 sem somar acumulados duplicados.
+
+- Q1 = acumulado 3M.
+- Q2 = acumulado 6M - acumulado 3M.
+- Q3 = acumulado 9M - acumulado 6M.
+- Q4 = DFP anual - acumulado 9M.
+- Q4 não é gerado quando a DFP ou o acumulado de 9M está ausente.
+- Contas e grupos não são misturados; cada resultado mantém a origem.
+
+**Atenção:** a regra de diferença acumulada é adequada para contas de fluxo (DRE/DFC). Não se deve aplicar essa transformação a contas patrimoniais de estoque (BPA/BPP), que representam posição em uma data. Para balanços, use diretamente a posição de fechamento do trimestre. A integração de indicadores ainda deve selecionar os tipos de conta apropriados.
