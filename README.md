@@ -102,3 +102,12 @@ data/exemplos/                    dados FICTÍCIOS (12 anos) para execução off
   respostas simuladas. Validar com dados reais.
 - Se g >= k o modelo diverge e o programa recusa o cálculo (aumente k ou escolha outra medida).
 - Dados de exemplo são fictícios.
+
+
+## Integração inicial com a CVM (em desenvolvimento)
+
+A coleta oficial foi iniciada em `preco_teto/provedores/cvm.py`. O módulo resolve ticker via FCA e baixa DFP anual, preservando contas contábeis, versão, grupo, período, moeda, escala e arquivo de origem. Os ZIPs ficam em `.cache/cvm` (não devem ser versionados).
+
+Esta primeira etapa **não gera preço teto com dados CVM ainda**: DFP fornece valores da companhia, enquanto LPA/DPA por ação exigem quantidade de ações e proventos consistentes. Também é necessária uma fonte independente para cotação atual. Consulte [docs/CVM_PIPELINE.md](docs/CVM_PIPELINE.md) antes de interpretar os dados.
+
+Fontes oficiais: [FCA](https://dados.cvm.gov.br/dataset/cia_aberta-doc-fca) · [DFP](https://dados.cvm.gov.br/dataset/cia_aberta-doc-dfp).
