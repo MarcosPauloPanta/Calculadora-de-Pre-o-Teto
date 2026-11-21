@@ -30,7 +30,7 @@ class TestTrimestresIsolados(unittest.TestCase):
         resultado = trimestres_isolados([conta(3, 10), conta(9, 60)])
         self.assertEqual([x.trimestre for x in resultado], [1])
 
-    def test_nao_mistura_grupos(self):
+    def test_ignora_saldos_de_balanco(self):\n        balanco = [conta(3, 100, demonstracao="BPA"), conta(6, 140, demonstracao="BPA")]\n        self.assertEqual(trimestres_isolados(balanco), ())\n\n    def test_nao_mistura_grupos(self):
         itr = [conta(3, 10, grupo="DF Consolidado"), conta(6, 30, grupo="DF Consolidado"),
                conta(3, 4, grupo="DF Individual"), conta(6, 9, grupo="DF Individual")]
         resultado = trimestres_isolados(itr)
