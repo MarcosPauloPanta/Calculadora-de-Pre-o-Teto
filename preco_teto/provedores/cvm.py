@@ -97,6 +97,7 @@ class ContaContabilCVM:
     data_recebimento: Optional[date]
     conta_fixa: str
     arquivo_origem: str
+    data_inicio_periodo: Optional[date] = None
 
     @property
     def valor(self) -> float:
@@ -271,8 +272,65 @@ class ClienteCVM:
         contas = self._deduplicar(contas)
         return RelatorioCVM(companhia, tuple(contas), anos)
 
+
+    def obter_relatorio_trimestral(
+        self, ticker_texto: str | Ticker, anos: int = 5
+    ) -> RelatorioCVM:
+        """Baixa ITR e preserva o início/fim de cada período.
+
+        DRE/DFC podem vir acumuladas desde o início do exercício. Use
+        cvm_periodos.trimestres_isolados para derivar trimestres isolados.
+        """
+        if not isinstance(anos, int) or not 1 <= anos <= 10:
+            raise DadosInvalidosError("A janela ITR deve ser um inteiro entre 1 e 10 anos.")
+        companhia = self.buscar_companhia(ticker_texto)
+        contas: list[ContaContabilCVM] = []
+        primeiro_ano = max(2011, self.ano_atual - anos + 1)
+        for ano in range(primeiro_ano, self.ano_atual + 1):
+            url = f"{_BASE}/DOC/ITR/DADOS/itr_cia_aberta_{ano}.zip"
+            cache = self.cache_dir / "itr" / f"itr_cia_aberta_{ano}.zip"
+            try:
+                pacote = self._baixar_zip(url, cache)
+            except ProvedorIndisponivelError:
+                if ano == self.ano_atual:
+                    continue
+                raise
+            for tipo in _TIPOS_ITR:
+                trecho = f"_{tipo.lower()}_"
+                for nome, linha in self._linhas_csv(pacote, trecho):
+                    cnpj = _campo(linha, "CNPJ_CIA", "CNPJ")
+                    cd_cvm = _campo(linha, "CD_CVM")
+                    if cnpj != companhia.cnpj and cd_cvm != companhia.cd_cvm:
+                        continue
+                    data_ref = _data(_campo(linha, "DT_REFER"))
+                    valor = _numero(_campo(linha, "VL_CONTA"))
+                    if data_ref is None or valor is None:
+                        continue
+                    contas.append(ContaContabilCVM(
+                        demonstracao=tipo,
+                        data_referencia=data_ref,
+                        data_fim_exercicio=_data(_campo(linha, "DT_FIM_EXERC")),
+                        grupo=_campo(linha, "GRUPO_DFP"),
+                        ordem_exercicio=_campo(linha, "ORDEM_EXERC"),
+                        codigo=_campo(linha, "CD_CONTA"),
+                        descricao=_campo(linha, "DS_CONTA"),
+                        valor_original=valor,
+                        escala_moeda=_campo(linha, "ESCALA_MOEDA"),
+                        moeda=_campo(linha, "MOEDA"),
+                        versao=_campo(linha, "VERSAO"),
+                        data_recebimento=_data(_campo(linha, "DT_RECEB")),
+                        conta_fixa=_campo(linha, "ST_CONTA_FIXA"),
+                        arquivo_origem=Path(nome).name,
+                        data_inicio_periodo=_data(_campo(linha, "DT_INI_EXERC")),
+                    ))
+        if not contas:
+            raise DadosInvalidosError(
+                f"{companhia.ticker}: a CVM não retornou contas ITR na janela de {anos} ano(s)."
+            )
+        return RelatorioCVM(companhia, tuple(self._deduplicar(contas)), anos)
+
     @staticmethod
-    def obter_relatorio_trimestral(\n        self, ticker_texto: str | Ticker, anos: int = 5\n    ) -> RelatorioCVM:\n        """Baixa ITR e preserva início/fim do período informado pela companhia.\n\n        As DRE/DFC podem ser acumuladas desde o início do exercício. Use\n        cvm_periodos para convertê-las em trimestres isolados antes de calcular LTM.\n        """\n        if not isinstance(anos, int) or not 1 <= anos <= 10:\n            raise DadosInvalidosError("A janela ITR deve ser um inteiro entre 1 e 10 anos.")\n        companhia = self.buscar_companhia(ticker_texto)\n        contas: list[ContaContabilCVM] = []\n        primeiro_ano = max(2011, self.ano_atual - anos + 1)\n        for ano in range(primeiro_ano, self.ano_atual + 1):\n            url = f"{_BASE}/DOC/ITR/DADOS/itr_cia_aberta_{ano}.zip"\n            cache = self.cache_dir / "itr" / f"itr_cia_aberta_{ano}.zip"\n            try:\n                pacote = self._baixar_zip(url, cache)\n            except ProvedorIndisponivelError:\n                if ano == self.ano_atual:\n                    continue\n                raise\n            for tipo in _TIPOS_ITR:\n                trecho = f"_{tipo.lower()}_"\n                for nome, linha in self._linhas_csv(pacote, trecho):\n                    cnpj = _campo(linha, "CNPJ_CIA", "CNPJ")\n                    cd_cvm = _campo(linha, "CD_CVM")\n                    if cnpj != companhia.cnpj and cd_cvm != companhia.cd_cvm:\n                        continue\n                    data_ref = _data(_campo(linha, "DT_REFER"))\n                    valor = _numero(_campo(linha, "VL_CONTA"))\n                    if data_ref is None or valor is None:\n                        continue\n                    contas.append(ContaContabilCVM(\n                        demonstracao=tipo, data_referencia=data_ref,\n                        data_fim_exercicio=_data(_campo(linha, "DT_FIM_EXERC")),\n                        grupo=_campo(linha, "GRUPO_DFP"),\n                        ordem_exercicio=_campo(linha, "ORDEM_EXERC"),\n                        codigo=_campo(linha, "CD_CONTA"),\n                        descricao=_campo(linha, "DS_CONTA"), valor_original=valor,\n                        escala_moeda=_campo(linha, "ESCALA_MOEDA"),\n                        moeda=_campo(linha, "MOEDA"), versao=_campo(linha, "VERSAO"),\n                        data_recebimento=_data(_campo(linha, "DT_RECEB")),\n                        conta_fixa=_campo(linha, "ST_CONTA_FIXA"),\n                        arquivo_origem=Path(nome).name,\n                        data_inicio_periodo=_data(_campo(linha, "DT_INI_EXERC")),\n                    ))\n        if not contas:\n            raise DadosInvalidosError(\n                f"{companhia.ticker}: a CVM não retornou contas ITR na janela de {anos} ano(s)."\n            )\n        return RelatorioCVM(companhia, tuple(self._deduplicar(contas)), anos)\n\n    @staticmethod\n    def _deduplicar(contas: list[ContaContabilCVM]) -> list[ContaContabilCVM]:
+    def _deduplicar(contas: list[ContaContabilCVM]) -> list[ContaContabilCVM]:
         """Mantém a versão mais recente por demonstração/período/grupo/conta."""
         escolhidas: dict[tuple[str, date, str, str, str], ContaContabilCVM] = {}
         for conta in contas:
